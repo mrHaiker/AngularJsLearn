@@ -32,8 +32,7 @@ angular.module('7minWorkout')
 
         var restExercise;
         var startWorkout = function () {
-            $scope.workoutPlan = createWorkout();
-            $scope.workoutTimeRemaining = $scope.workoutPlan.totalWorkoutDuration();
+            workoutPlan = createWorkout();
             restExercise = {
                 details: new Exercise({
                     name: "rest",
@@ -41,13 +40,9 @@ angular.module('7minWorkout')
                     description: "Relax a bit!",
                     image: "img/rest.png"
                 }),
-                duration: $scope.workoutPlan.restBetweenExercise
+                duration: workoutPlan.restBetweenExercise
             };
-            $interval(function () {
-                $scope.workoutTimeRemaining = $scope.workoutTimeRemaining - 1;
-            }, 1000, $scope.workoutTimeRemaining);
-
-            startExercise($scope.workoutPlan.exercises.shift());
+            startExercise(workoutPlan.exercises.shift());
         };
 
         var startExercise = function (exercisePlan) {
@@ -62,17 +57,17 @@ angular.module('7minWorkout')
                         startExercise(next);
                     }
                     else {
-                        $location.path('/finish');
+                        console.log("Workout complete!")
                     }
                 });
         };
         var getNextExercise = function (currentExercisePlan) {
             var nextExercise = null;
             if (currentExercisePlan === restExercise) {
-                nextExercise = $scope.workoutPlan.exercises.shift();
+                nextExercise = workoutPlan.exercises.shift();
             }
             else {
-                if ($scope.workoutPlan.exercises.length != 0) {
+                if (workoutPlan.exercises.length != 0) {
                     nextExercise = restExercise;
                 }
             }
@@ -262,3 +257,45 @@ angular.module('7minWorkout')
 
         init();
     }]);
+
+
+angular.module('7minWorkout')
+    .controller('WorkoutAudioController', ['$scope', '$timeout', function ($scope, $timeout) {
+        $scope.exercisesAudio = [];
+        var workoutPlanwatch = $scope.$watch('workoutPlan', function (newValue, oldValue) {
+            if (newValue) {  // newValue==workoutPlan
+                angular.forEach( $scope.workoutPlan.exercises,
+                    function (exercise) {
+                        $scope.exercisesAudio.push({
+                            src: exercise.details.nameSound,
+                            type: "audio/wav"
+                        });
+                    });
+                workoutPlanwatch(); //unbind the watch.
+            }
+        });
+        $scope.$watch('currentExercise', function (newValue, oldValue) {
+            if (newValue && newValue !== oldValue) {
+                if ($scope.currentExercise.details.name == 'rest') {
+                    $timeout(function () { $scope.nextUpAudio.play();}
+                        , 2000);
+                    $timeout(function () { $scope.nextUpExerciseAudio.play($scope.currentExerciseIndex + 1, true);}
+                        , 3000);
+                }
+            }
+        });
+
+        $scope.$watch('currentExerciseDuration', function (newValue, oldValue) {
+            if (newValue) {
+                if (newValue == Math.floor($scope.currentExercise.duration / 2) && $scope.currentExercise.details.name !== 'rest') {
+                    $scope.halfWayAudio.play();
+                }
+                else if (newValue == $scope.currentExercise.duration - 3) {
+                    $scope.aboutToCompleteAudio.play();
+                }
+            }
+        });
+        var init = function () {
+        }
+        init();
+    }])
