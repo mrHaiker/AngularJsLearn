@@ -12,6 +12,7 @@
     "angular": "^1.5.8"
   },
   "devDependencies": {
-    "angular-route": "^1.2.32"
+    "angular-route": "^1.2.32",
+    "angular-sanitize": "^1.5.8"
   }
 }
