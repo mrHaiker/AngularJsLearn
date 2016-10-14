@@ -31,6 +31,7 @@ angular.module('7minWorkout')
         }
 
         var restExercise;
+        var exerciseIntervalPromise;
         var startWorkout = function () {
             workoutPlan = createWorkout();
             restExercise = {
@@ -48,18 +49,7 @@ angular.module('7minWorkout')
         var startExercise = function (exercisePlan) {
             $scope.currentExercise = exercisePlan;
             $scope.currentExerciseDuration = 0;
-            $interval(function () {
-                ++$scope.currentExerciseDuration;
-            }, 1000, $scope.currentExercise.duration)
-                .then(function () {
-                    var next = getNextExercise(exercisePlan);
-                    if (next) {
-                        startExercise(next);
-                    }
-                    else {
-                        console.log("Workout complete!")
-                    }
-                });
+            exerciseIntervalPromise = startExerciseTimeTracking();
         };
         var getNextExercise = function (currentExercisePlan) {
             var nextExercise = null;
@@ -72,6 +62,38 @@ angular.module('7minWorkout')
                 }
             }
             return nextExercise;
+        };
+
+        var startExerciseTimeTracking = function () {
+            var promise = $interval(function () {
+                ++$scope.currentExerciseDuration;
+                --$scope.workoutTimeRemaining;
+            }, 1000, $scope.currentExercise.duration - $scope.currentExerciseDuration);
+
+            promise.then(function () {
+                var next = getNextExercise($scope.currentExercise);
+                if (next) {
+                    startExercise(next);
+                } else {
+                    $location.path('/finish');
+                }});
+            return promise;
+        };
+
+        $scope.pauseWorkout = function () {
+            $interval.cancel(exerciseIntervalPromise);
+            $scope.workoutPaused = true;
+        };
+        $scope.resumeWorkout = function () {
+            exerciseIntervalPromise = startExerciseTimeTracking();
+            $scope.workoutPaused = false;
+        };
+        $scope.pauseResumeToggle = function () {
+            if ($scope.workoutPaused) {
+                $scope.resumeWorkout();
+            } else {
+                $scope.pauseWorkout();
+            }
         };
 
         var createWorkout = function () {
@@ -249,7 +271,8 @@ angular.module('7minWorkout')
                 duration: 30
             });
             return workout;
-        }
+        };
+
 
         var init = function () {
             startWorkout();
@@ -295,6 +318,30 @@ angular.module('7minWorkout')
                 }
             }
         });
+        $scope.$watch('workoutPaused', function (newValue, oldValue) {
+            if (newValue) {
+                $scope.ticksAudio.pause();
+                $scope.nextUpAudio.pause();
+                $scope.nextUpExerciseAudio.pause();
+                $scope.halfWayAudio.pause();
+                $scope.aboutToCompleteAudio.pause();
+            } else {
+                $scope.ticksAudio.play();
+                if ($scope.halfWayAudio.currentTime > 0 &&
+                    $scope.halfWayAudio.currentTime <
+                    $scope.halfWayAudio.duration)
+                    $scope.halfWayAudio.play();
+                if ($scope.aboutToCompleteAudio.currentTime > 0 &&
+                    $scope.aboutToCompleteAudio.currentTime <
+                    $scope.aboutToCompleteAudio.duration)
+                    $scope.aboutToCompleteAudio.play();
+            }
+        });
+        $scope.onKeyPressed = function (event) {
+            if (event.which == 80 || event.which == 112) { // 'p' or 'P'
+                $scope.pauseResumeToggle();
+            }
+        };
         var init = function () {
         }
         init();
