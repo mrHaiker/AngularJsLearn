@@ -4,7 +4,7 @@
 
 angular.module('7minWorkout')
     .controller('WorkoutController', ['$scope', '$interval', '$location', function ($scope, $interval, $location) {
-        function WorkoutPlan(args) {
+        function workoutPlan(args) {
             this.exercises = [];
             this.name = args.name;
             this.title = args.title;
@@ -31,24 +31,23 @@ angular.module('7minWorkout')
         }
 
         var restExercise;
-        var workoutPlan;
         var startWorkout = function () {
-            workoutPlan = createWorkout();
-            $scope.workoutTimeRemaining = workoutPlan.totalWorkoutDuration();
+            $scope.workoutPlan = createWorkout();
+            $scope.workoutTimeRemaining = $scope.workoutPlan.totalWorkoutDuration();
             restExercise = {
                 details: new Exercise({
                     name: "rest",
                     title: "Relax!",
                     description: "Relax a bit!",
-                    image: "img/rest.png",
+                    image: "img/rest.png"
                 }),
-                duration: workoutPlan.restBetweenExercise
+                duration: $scope.workoutPlan.restBetweenExercise
             };
             $interval(function () {
                 $scope.workoutTimeRemaining = $scope.workoutTimeRemaining - 1;
             }, 1000, $scope.workoutTimeRemaining);
 
-            startExercise(workoutPlan.exercises.shift());
+            startExercise($scope.workoutPlan.exercises.shift());
         };
 
         var startExercise = function (exercisePlan) {
@@ -70,29 +69,18 @@ angular.module('7minWorkout')
         var getNextExercise = function (currentExercisePlan) {
             var nextExercise = null;
             if (currentExercisePlan === restExercise) {
-                nextExercise = workoutPlan.exercises.shift();
+                nextExercise = $scope.workoutPlan.exercises.shift();
             }
             else {
-                if (workoutPlan.exercises.length != 0) {
+                if ($scope.workoutPlan.exercises.length != 0) {
                     nextExercise = restExercise;
                 }
             }
             return nextExercise;
         };
 
-        //$scope.$watch('currentExerciseDuration', function (nVal) {
-        //    if (nVal == $scope.currentExercise.duration) {
-        //        var next = getNextExercise($scope.currentExercise);
-        //        if (next) {
-        //            startExercise(next);
-        //        } else {
-        //            console.log("Workout complete!")
-        //        }
-        //    }
-        //});
-
         var createWorkout = function () {
-            var workout = new WorkoutPlan({
+            var workout = new workoutPlan({
                 name: "7minWorkout",
                 title: "7 Minute Workout",
                 restBetweenExercise: 10
