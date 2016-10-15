@@ -13,6 +13,7 @@
   },
   "devDependencies": {
     "angular-animate": "^1.5.8",
+    "angular-local-storage": "^0.5.0",
     "angular-media-player": "^0.5.8",
     "angular-route": "^1.2.32",
     "angular-sanitize": "^1.5.8",
