@@ -21,7 +21,8 @@ angular.module('app')
       };
       WorkoutHistoryController['$inject'] = ['$scope', '$modalInstance', 'workoutHistoryTracker'];
 
-      $scope.$on('$routeChangeSuccess', function (e, current, previous) {
+      $scope.$on('$routeChangeSuccess', function (e, current,previous) {
           $scope.currentRoute = current;
       });
+
   }]);
