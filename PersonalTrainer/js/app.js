@@ -38,6 +38,7 @@ config(function ($routeProvider, $sceDelegateProvider, WorkoutServiceProvider, A
         leftNav: 'partials/workoutbuilder/left-nav-exercises.html',
         controller: 'WorkoutDetailController',
         topNav: 'partials/workoutbuilder/top-nav.html',
+        routeErrorMessage: "Could not load the specific workout!",
         resolve: {
             selectedWorkout: ['WorkoutBuilderService', '$route', '$location', function (WorkoutBuilderService, $route, $location) {
                 var workout = WorkoutBuilderService.startBuilding($route.current.params.id);
