@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('app', ['ngRoute', 'ngSanitize', '7minWorkout', 'WorkoutBuilder', 'mediaPlayer', 'ui.bootstrap', 'LocalStorageModule', 'ngAnimate', 'ngMessages']).
+angular.module('app', ['ngRoute', 'ngSanitize', '7minWorkout', 'WorkoutBuilder', 'mediaPlayer', 'ui.bootstrap', 'LocalStorageModule', 'ngAnimate', 'ngMessages', 'ngResource']).
 config(function ($routeProvider, $sceDelegateProvider, WorkoutServiceProvider) {
     $routeProvider.when('/start', { templateUrl: 'partials/start.html' });
     $routeProvider.when('/workout', { templateUrl: 'partials/workout.html', controller: 'WorkoutController' });
