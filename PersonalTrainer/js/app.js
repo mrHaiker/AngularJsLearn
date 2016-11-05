@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('app', ['ngRoute', 'ngSanitize', '7minWorkout', 'WorkoutBuilder', 'mediaPlayer', 'ui.bootstrap', 'LocalStorageModule', 'ngAnimate', 'ngMessages', 'ngResource']).
-config(function ($routeProvider, $sceDelegateProvider, WorkoutServiceProvider) {
+config(function ($routeProvider, $sceDelegateProvider, WorkoutServiceProvider, ApiKeyAppenderInterceptorProvider, $httpProvider) {
     $routeProvider.when('/start', { templateUrl: 'partials/start.html' });
     $routeProvider.when('/workout', { templateUrl: 'partials/workout.html', controller: 'WorkoutController' });
     $routeProvider.when('/finish', { templateUrl: 'partials/finish.html' });
@@ -63,6 +63,9 @@ config(function ($routeProvider, $sceDelegateProvider, WorkoutServiceProvider) {
     $routeProvider.otherwise({ redirectTo: '/start' });
 
     WorkoutServiceProvider.configure("angular_learn", "ESLgl33hBabfeD3RHmoYmtcYoroLeSnJ");
+
+    ApiKeyAppenderInterceptorProvider.setApiKey("ESLgl33hBabfeD3RHmoYmtcYoroLeSnJ");
+    $httpProvider.interceptors.push('ApiKeyAppenderInterceptor');
 
     $sceDelegateProvider.resourceUrlWhitelist([
       // Allow same origin resource loads.
