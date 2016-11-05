@@ -22,7 +22,12 @@ angular.module('app')
             var service = {};
 
             service.getExercises = function () {
-                return $http.get(collectionsUrl + "/exercises", { params: { apiKey: apiKey } });
+                return $http.get(collectionsUrl + "/exercises", { params: { apiKey: apiKey } })
+                    .then(function (response) {
+                        return response.data.map(function (exercise) {
+                            return new Exercise(exercise);
+                        })
+                    });
             };
             
             service.getExercise = function (name) {
@@ -60,15 +65,25 @@ angular.module('app')
             };
 
             service.getWorkouts = function () {
-                return $http.get(collectionsUrl + "/workouts", { params: { apiKey: apiKey } });
+                return $http.get(collectionsUrl + "/workouts", { params: { apiKey: apiKey } })
+                    .then(function (response) {
+                        return response.data.map(function (workout) {
+                            return new WorkoutPlan(workout);
+                        });
+                    });
             };
 
             service.getWorkout = function (name) {
-                var result = null;
-                angular.forEach(service.getWorkouts(), function (workout) {
-                    if (workout.name === name) result = angular.copy(workout);
-                });
-                return result;
+                return $q.all([service.getExercises(), $http.get(collectionsUrl + "/workouts/" + name, { params: { apiKey: apiKey } })])
+                    .then(function (response) {
+                        var allExercises = response[0];
+                        var workout = new WorkoutPlan(response[1].data);
+
+                        angular.forEach(response[1].data.exercises, function (exercise) {
+                            exercise.details = allExercises.filter(function (e) { return e.name === exercise.name; })[0];
+                        });
+                        return workout;
+                    });
             };
 
             service.updateWorkout = function (workout) {
