@@ -5,17 +5,15 @@
         </h2>
     </div>
     <form class="row" name="formWorkout" novalidate>
-        <div id="exercises-list" class="col-sm-4 col-sm-offset-1">
+        <div id="exercises-list" class="col-sm-5 col-sm-offset-1">
             <span name="exerciseCount" ng-model="workout.exercises.length"></span>
             <div class="alert alert-danger" ng-show="formWorkout.exerciseCount.$dirty && formWorkout.exerciseCount.$error.count">
                 The workout should have at least one exercise!
             </div>
-            <div ng-repeat="exercise in workout.exercises" class="exercise-item" ng-click="selected.exercise=exercise">
+            <div ng-repeat="exercise in workout.exercises" class="exercise-item">
                 <div ng-include="'workout-exercise-tile'"></div>
             </div>
         </div>
-        <div id="exercise-description" class="col-sm-1">
-            {{selected.exercise.details.description}}</div>
         <div id="workout-data" class="col-sm-3">
             <div class="form-group row" ng-class="{'has-error':formWorkout.workoutName.$invalid}">
                 <label for="workout-name">Name:</label>
@@ -57,32 +55,34 @@
             </div>
             <div class="row">
                 <div>
-                    <button class="btn pull-right" ng-class="{'btn-default':formWorkout.$valid,'btn-warning':!formWorkout.$valid}" ng-click="save()"
-                            popover="{{formWorkout.$invalid ? 'The form has errors.' : null}}" popover-trigger="mouseenter">Save</button>
+                    <button class="btn pull-right" ng-class="{'btn-default':formWorkout.$valid,'btn-warning':!formWorkout.$valid}" ng-click="save()" 
+                        popover="{{formWorkout.$invalid ? 'The form has errors.' : null}}" popover-trigger="mouseenter">Save</button>
                     <button class="btn btn-primary pull-right" ng-click="reset()">Reset</button>
                 </div>
             </div>
         </div>
-
     </form>
 </div>
 <script type="text/ng-template" id="workout-exercise-tile">
-    <div class="exercise tile" id="workout-exercise-tile">
+    <div class="exercise tile">
+        <div class="title">
             {{exercise.details.title}}
             <div class="pull-right" ng-click="removeExercise(exercise)"><span class="glyphicon glyphicon-trash"></span></div>
         </div>
         <div class="index"><span>{{$index+1}}</span></div>
-		<div class="main">
-			<div class="image">
-				<img ng-src="{{exercise.details.image ? exercise.details.image : '/img/running.png'}}"/>
-			</div>
+        <div class="main">
+            <div class="image">
+                <img ng-src="{{exercise.details.image ? exercise.details.image : '/img/running.png'}}" />
+            </div>
             <div class="details">
                 <ng-form name="formDuration">
-                    <select class="select-duration form-control" name="duration" ng-model="exercise.duration" ng-options="duration.value as duration.title for duration in durations"></select>
-                    <label ng-show="hasError(formDuration.duration, formDuration.duration.$error.required)" class="text-danger">Time duration is required.</label>
+                    <select class="select-duration form-control" name="duration" ng-model="exercise.duration" ng-options="duration.value as duration.title for duration in durations" required>
+                        <option value="">Select Duration</option>
+                    </select>
+                    <label ng-show="hasError(formDuration.duration,formDuration.duration.$error.required)" class="text-danger">Time duration is required.</label>
                 </ng-form>
             </div>
-		</div>
+        </div>
         <div class="order">
             <button class="btn btn-info" ng-click="moveExerciseTo(exercise,0)"><span class="glyphicon glyphicon-upload"></span></button>
             <button class="btn btn-info" ng-click="moveExerciseTo(exercise,$index-1)"><span class="glyphicon glyphicon-chevron-up"></span></button>

@@ -6,16 +6,26 @@ angular.module('WorkoutBuilder')
           $location.path('/builder/workouts/' + workout.name);
       }
       var init = function () {
-          $scope.workouts = WorkoutService.getWorkouts();
+          WorkoutService.getExercises().success(function (data) {
+              $scope.exercises = data;
+          })
       };
       init();
   }]);
 
 angular.module('WorkoutBuilder')
-  .controller('WorkoutDetailController', ['$scope', 'WorkoutBuilderService', 'selectedWorkout', '$location', '$timeout', '$routeParams', function ($scope, WorkoutBuilderService, selectedWorkout, $location, $timeout, $routeParams) {
+  .controller('WorkoutDetailController', ['$scope', 'WorkoutBuilderService', 'selectedWorkout', '$location', '$routeParams', function ($scope, WorkoutBuilderService, selectedWorkout, $location, $routeParams) {
       $scope.removeExercise = function (exercise) {
           WorkoutBuilderService.removeExercise(exercise);
       };
+
+      $scope.save = function () {
+          $scope.submitted = true;      // Will force validations
+          if ($scope.formWorkout.$invalid) return;
+          $scope.workout = WorkoutBuilderService.save();
+          $scope.formWorkout.$setPristine();
+          $scope.submitted = false;
+      }
 
       $scope.$watch('formWorkout.exerciseCount', function (newValue) {
           if (newValue) {
@@ -31,18 +41,27 @@ angular.module('WorkoutBuilder')
           }
       });
 
-      var restWatch = $scope.$watch('formWorkout.restBetweenExercise', function (newValue) {
-         // Conversion logic courtesy http://stackoverflow.com/questions/596467/how-do-i-convert-a-number-to-an-integer-in-javascript
-         if (newValue) {
-             newValue.$parsers.unshift(function (value) {
-                 return isNaN(parseInt(value)) ? value : parseInt(value);
-             });
-             newValue.$formatters.push(function (value) {
-                 return isNaN(parseInt(value)) ? value : parseInt(value);
-             });
-             restWatch(); //De-register the watch.
-         }
-      });
+      //var restWatch = $scope.$watch('formWorkout.restBetweenExercise', function (newValue) {
+      //    // Conversion logic courtesy http://stackoverflow.com/questions/596467/how-do-i-convert-a-number-to-an-integer-in-javascript
+      //    if (newValue) {
+      //        newValue.$parsers.unshift(function (value) {
+      //            return isNaN(parseInt(value)) ? value : parseInt(value);
+      //        });
+      //        newValue.$formatters.push(function (value) {
+      //            return isNaN(parseInt(value)) ? value : parseInt(value);
+      //        });
+      //        restWatch(); //De-register the watch.
+      //    }
+      //});
+      $scope.hasError = function (modelController, error) {
+          return (modelController.$dirty || $scope.submitted) && error;
+      }
+
+      $scope.reset = function () {
+          $scope.workout = WorkoutBuilderService.startBuilding($routeParams.id);
+          $scope.formWorkout.$setPristine();
+          $scope.submitted = false;      // Will force validations
+      };
 
       $scope.moveExerciseTo = function (exercise, location) {
           WorkoutBuilderService.moveExerciseTo(exercise, location);
@@ -69,33 +88,16 @@ angular.module('WorkoutBuilder')
                          { title: "4 minutes 45 seconds", value: 285 },
                          { title: "5 minutes", value: 300 }];
 
-
-      $scope.save = function () {
-          $scope.submitted = true; // Will force validations
-          if ($scope.formWorkout.$invalid) return;
-          $scope.workout = WorkoutBuilderService.save();
-          $scope.formWorkout.$setPristine();
-          $scope.submitted = false;
+      $scope.canDeleteWorkout = function () {
+          return WorkoutBuilderService.canDeleteWorkout();
       }
 
-      $scope.hasError = function (modelController, error) {
-          return (modelController.$dirty || $scope.submitted) && error;
-      }
-
-      $scope.reset = function () {
-          $scope.workout = WorkoutBuilderService.startBuilding($routeParams.id);
-          $scope.formWorkout.$setPristine();
-          $scope.submitted = false;
+      $scope.deleteWorkout = function () {
+          WorkoutBuilderService.delete();
+          $location.path('/builder/workouts/');
       };
-
-      $scope.selected = {};
-
       var init = function () {
           $scope.workout = selectedWorkout;
-          $timeout(function () {
-              console.log($scope.formWorkout);
-
-          },1000)
       };
       init();
   }]);
