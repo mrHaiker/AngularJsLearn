@@ -14,7 +14,7 @@ angular.module('WorkoutBuilder')
   }]);
 
 angular.module('WorkoutBuilder')
-  .controller('WorkoutDetailController', ['$scope', 'WorkoutBuilderService', 'selectedWorkout', '$location', '$routeParams', function ($scope, WorkoutBuilderService, selectedWorkout, $location, $routeParams) {
+  .controller('WorkoutDetailController', ['$scope', 'WorkoutBuilderService', 'selectedWorkout', '$location', '$routeParams', '$q', 'WorkoutService', function ($scope, WorkoutBuilderService, selectedWorkout, $location, $routeParams, $q, WorkoutService) {
       $scope.removeExercise = function (exercise) {
           WorkoutBuilderService.removeExercise(exercise);
       };
@@ -27,7 +27,7 @@ angular.module('WorkoutBuilder')
               $scope.formWorkout.$setPristine();
               $scope.submitted = false;
           });
-      }
+      };
 
       $scope.$watch('formWorkout.exerciseCount', function (newValue) {
           if (newValue) {
@@ -42,6 +42,16 @@ angular.module('WorkoutBuilder')
               $scope.formWorkout.exerciseCount.$setValidity("count", newValue > 0);
           }
       });
+
+      $scope.uniqueUserName = function (value) {
+          if (!value || value === $routeParams.id) return $q.when(true);
+          return WorkoutService.getWorkout(value.toLowerCase())
+              .then(function (data) {
+                  return $q.reject();
+              }, function (error) {
+                  return true;
+              });
+      };
 
       //var restWatch = $scope.$watch('formWorkout.restBetweenExercise', function (newValue) {
       //    // Conversion logic courtesy http://stackoverflow.com/questions/596467/how-do-i-convert-a-number-to-an-integer-in-javascript
